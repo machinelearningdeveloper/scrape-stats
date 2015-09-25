@@ -1,2 +1,2 @@
-# scrape-stats
-Scrape statistics
+# spatula
+Scrape pages
