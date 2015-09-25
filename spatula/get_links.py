@@ -54,7 +54,7 @@ def get_matching_links_in_pages_at(urls, pattern):
     """
     links = []
     for url in urls:
-        links.extend(get_matching_links_in_pages_at(url, pattern))
+        links.extend(get_matching_links_in_page_at(url, pattern))
     return links
 
 def follow_matching_links_in_pages_at(urls, patterns):
@@ -76,7 +76,7 @@ def follow_matching_links_in_pages_at(urls, patterns):
     """
     links = [urls]
     for pattern in patterns:
-        links = get_links_in_pages(links, pattern)
+        links = get_matching_links_in_pages_at(links, pattern)
     return links
 
 def main():
