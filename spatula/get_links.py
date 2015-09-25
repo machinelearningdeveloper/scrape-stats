@@ -1,11 +1,16 @@
 """For each pattern and each URL, starting at start_url, find the
-URLs of all links matching pattern."""
+URLs of all links matching pattern.
+"""
+
+import argparse
+from bs4 import BeautifulSoup
+import re
 
 def parse_args():
     """Parse commandline arguments."""
-    parser = argparse.ArgumentParser(description='For each pattern and each address, starting at start_url, find the addresses of all links matching pattern.'
-    parser.add_argument('--start_url', '-s', required=True, help='the url of the page at which to start the recursive pattern search')
-    parser.add_argument('--patterns', '-p', required=True, nargs='+', help='patterns '
+    parser = argparse.ArgumentParser(description='For each pattern and each address, starting at start_url, find the addresses of all links matching pattern.')
+    parser.add_argument('--start_url', '-s', required=True, help='the url of the page at which to start the search for links matching patterns')
+    parser.add_argument('--patterns', '-p', required=True, nargs='+', help='regular expressions to search in each link in each page at each url')
     return parser.parse_args()
 
 def get_matching_links_in_page_at(url, pattern):
