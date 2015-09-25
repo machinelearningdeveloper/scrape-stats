@@ -83,7 +83,7 @@ def main():
     """Parse commandline arguments & report the addresses of
     linked statistics pages."""
     args = parse_args()
-    links = follow_matching_links_in_pages_at([args.url], args.patterns)
+    links = follow_matching_links_in_pages_at([args.start_url], args.patterns)
     for link in links:
         print(link)
 
