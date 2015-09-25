@@ -5,6 +5,7 @@ URLs of all links matching pattern.
 import argparse
 from bs4 import BeautifulSoup
 import re
+import requests
 
 def parse_args():
     """Parse commandline arguments."""
