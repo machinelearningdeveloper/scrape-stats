@@ -1,31 +1,84 @@
-"""Given the address of a landing page, find the addresses of all
-linked statistics pages."""
+"""For each pattern and each URL, starting at start_url, find the
+URLs of all links matching pattern."""
 
 def parse_args():
     """Parse commandline arguments."""
-    parser = argparse.ArgumentParser(description='Given the address of a landing page, find the addresses of all linked statistics pages.')
-    parser.add_argument('--url', '-u', required=True, help='URL of the landing page having links to statistics pages')
+    parser = argparse.ArgumentParser(description='For each pattern and each address, starting at start_url, find the addresses of all links matching pattern.'
+    parser.add_argument('--start_url', '-s', required=True, help='the url of the page at which to start the recursive pattern search')
+    parser.add_argument('--patterns', '-p', required=True, nargs='+', help='patterns '
     return parser.parse_args()
 
-def get_statistics_pages(url):
-    """
+def get_matching_links_in_page_at(url, pattern):
+    """Get all links in page at URL with href matching pattern.
+
     Arguments
     ---------
     url : str
-        URL of the landing page having links to statistics pages
+        URL of page containing links
+    pattern : str
+        regular expression to search in each link in page at url
 
     Returns
     -------
-    statistics_pages : list
-        list of strings representing URLs of statistics pages
+    links : list
+        list of links (URLs) matching pattern
     """
-    pass
+    compiled_pattern = re.compile(pattern)
+    page = requests.get(url)
+    soup = BeautifulSoup(page)
+    anchors = soup.findAll('a')
+    hrefs = [anchor.get('href') for anchor in anchors]
+    links = filter(lambda href: compiled_pattern.search(href) != None, hrefs)
+    return links
+
+def get_matching_links_in_pages_at(urls, pattern):
+    """Get all links in pages at URLs with href matching pattern.
+
+    Arguments
+    ---------
+    urls : list
+        list of URLs of pages containing links
+    pattern : str
+        regular expression to search in each link in each page
+        at each url
+
+    Returns
+    -------
+    links : list
+        list of links (URLs) matching pattern
+    """
+    links = []
+    for url in urls:
+        links.extend(get_matching_links_in_pages_at(url, pattern))
+    return links
+
+def follow_matching_links_in_pages_at(urls, patterns):
+    """For each pattern, get all links in pages at URLs with href
+    matching pattern and update the URLs to search for matching links.
+
+    Arguments
+    ---------
+    urls : list
+        list of URLs of pages containing links
+    patterns : list
+        regular expressions to search in each link in each page
+        at each url
+
+    Returns
+    -------
+    links : list
+        list of links (URLs) matching pattern
+    """
+    links = [urls]
+    for pattern in patterns:
+        links = get_links_in_pages(links, pattern)
+    return links
 
 def main():
     """Parse commandline arguments & report the addresses of
     linked statistics pages."""
     args = parse_args()
-    statistics_pages = get_statistics_pages(args.url)
-    for statistics_page in statistics_pages:
-        print(statistics_page)
+    links = follow_matching_links_in_pages_at([args.url], args.patterns)
+    for link in links:
+        print(link)
 
