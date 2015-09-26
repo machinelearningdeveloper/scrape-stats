@@ -4,8 +4,10 @@ URLs of all links matching pattern.
 
 import argparse
 from bs4 import BeautifulSoup
+import os.path
 import re
 import requests
+import urllib.parse
 
 def parse_args():
     """Parse commandline arguments."""
@@ -29,12 +31,24 @@ def get_matching_links_in_page_at(url, pattern):
     links : list
         list of links (URLs) matching pattern
     """
+    parsed_url = urllib.parse.urlparse(url)
+    scheme = parsed_url.scheme
+    netloc = parsed_url.netloc
+    path = parsed_url.path
     compiled_pattern = re.compile(pattern)
-    page = requests.get(url)
+    page = requests.get(url).text
     soup = BeautifulSoup(page)
     anchors = soup.findAll('a')
     hrefs = [anchor.get('href') for anchor in anchors]
-    links = filter(lambda href: compiled_pattern.search(href) != None, hrefs)
+    links = list(filter(lambda href: compiled_pattern.search(href) != None, hrefs))
+    scheme_pattern = re.compile(r'[a-z]+://')
+    for (index, link) in enumerate(links):
+        if link.startswith('/'):
+            links[index] = scheme + '://' + netloc + link
+        elif link.startswith('#'):
+            links[index] = url + link
+        elif not scheme_pattern.match(link):
+            links[index] = scheme + netloc + os.path.dirname(path) + '/' + link
     return links
 
 def get_matching_links_in_pages_at(urls, pattern):
@@ -75,7 +89,7 @@ def follow_matching_links_in_pages_at(urls, patterns):
     links : list
         list of links (URLs) matching pattern
     """
-    links = [urls]
+    links = urls
     for pattern in patterns:
         links = get_matching_links_in_pages_at(links, pattern)
     return links
