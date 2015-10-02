@@ -1,2 +1,2 @@
 # spatula
-Scrape pages
+Scrape data
